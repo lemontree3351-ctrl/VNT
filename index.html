@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>You're My Universe ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Itim&family=Mali:wght@500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --pink-light: #ffdeeb;
+            --pink-main: #ff85a1;
+            --pink-deep: #ff4d6d;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Mali', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a1c4fd);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* หน้าแรก (เพื่อให้เพลงเล่นได้) */
+        #gate {
+            position: fixed; inset: 0; z-index: 999;
+            background: white; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        /* วิบวับพื้นหลัง */
+        .sparkle {
+            position: absolute; background: white; border-radius: 50%;
+            pointer-events: none; animation: sparkleAnim var(--d) linear infinite;
+            opacity: 0; z-index: 1;
+        }
+        @keyframes sparkleAnim {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+        }
+
+        .card {
+            position: relative; width: 92%; max-width: 400px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50px; padding: 40px 25px;
+            text-align: center; color: #444;
+            box-shadow: 0 25px 50px rgba(255, 77, 109, 0.2);
+            z-index: 10; display: none;
+            animation: cardAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        h1 { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: 3rem; color: var(--pink-deep); margin: 0;
+            text-shadow: 0 5px 15px rgba(255,77,109,0.2);
+        }
+
+        .scratch-outer {
+            position: relative; width: 200px; height: 200px;
+            margin: 25px auto; border-radius: 50%; padding: 8px;
+            background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .scratch-inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; position: relative; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 5; touch-action: none; cursor: crosshair; }
+        .hidden-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ปุ่มกด */
+        .btn-box { 
+            display: flex; gap: 15px; margin-top: 30px; 
+            justify-content: center; align-items: center; 
+            min-height: 100px; position: relative;
+        }
+        
+        .btn { 
+            padding: 16px 32px; border-radius: 50px; border: none; 
+            font-family: 'Itim', cursive; font-size: 1.3rem; 
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        #yes-btn { 
+            background: var(--pink-deep); color: white; 
+            box-shadow: 0 10px 20px rgba(255, 77, 109, 0.4);
+            z-index: 100;
+        }
+
+        #no-btn { 
+            background: #eee; color: #888; 
+            border: 1px solid #ddd; z-index: 50;
+        }
+
+        .shake { animation: shake 0.3s infinite; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-2deg); }
+            75% { transform: translateX(5px) rotate(2deg); }
+        }
+
+        .heart-fly {
+            position: absolute; pointer-events: none;
+            animation: fly 1s ease-out forwards;
+            font-size: 20px;
+        }
+        @keyframes fly {
+            to { transform: translateY(-100px) translateX(var(--x)) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop preload="auto">
+        <source src="mp3/PS I LOVE YOU.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="gate">
+        <h1 style="font-size: 2.5rem; color: #ff4d6d;">For Someone Special 💖</h1>
+        <button onclick="openLove()" style="background:#ff4d6d; color:white; padding:18px 50px; border:none; border-radius:50px; font-size: 1.2rem; cursor: pointer; font-family: 'Itim'; margin-top: 25px;">เปิดจดหมายลับ ❤️</button>
+    </div>
+
+    <div class="card" id="love-card">
+        <h1>Valentine's Day</h1>
+        <p style="color: #888; margin: 10px 0;">"ขอบคุณที่เข้ามาเป็นเรื่องราวดีๆ   ในทุกวันของเรานะ"</p>
+        
+        <div class="scratch-outer">
+            <div class="scratch-inner">
+                <img src="img/img2.jpg" class="hidden-img" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400'">
+                <canvas id="canvas" width="200" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="btn-box" id="btn-area">
+            <button id="yes-btn" class="btn">ตกลงที่สุด ❤️</button>
+            <button id="no-btn" class="btn">ไม่ล่ะ 💔</button>
+        </div>
+    </div>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        let yesScale = 1;
+        const sweetMessages = ["ตกลงเถอะนะ ❤️", "นะน้าาาาา 🥺", "เค้ารออยู่นะ", "เสียใจจัง 🥺", "รักที่สุดเลย!"];
+
+        function openLove() {
+            music.play().catch(e => console.log("Audio play failed"));
+            document.getElementById('gate').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('love-card').style.display = 'block';
+                initScratch();
+                createSparkles();
+            }, 500);
+        }
+
+        // วิบวับพื้นหลัง
+        function createSparkles() {
+            setInterval(() => {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                const size = Math.random() * 5 + 2 + 'px';
+                s.style.width = size; s.style.height = size;
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.top = '100vh';
+                s.style.setProperty('--d', Math.random() * 3 + 2 + 's');
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 5000);
+            }, 150);
+        }
+
+        function initScratch() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const g = ctx.createLinearGradient(0,0,200,200);
+            g.addColorStop(0, '#ff9a9e'); g.addColorStop(1, '#fecfef');
+            ctx.fillStyle = g; ctx.fillRect(0,0,200,200);
+            ctx.fillStyle = 'white'; ctx.font = 'bold 18px Itim'; ctx.textAlign = 'center';
+            ctx.fillText('ขูดหาความรัก ✨', 100, 110);
+
+            const scratch = (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI*2); ctx.fill();
+            };
+            canvas.addEventListener('touchmove', scratch);
+            canvas.addEventListener('mousemove', (e) => e.buttons === 1 && scratch(e));
+        }
+
+        const noBtn = document.getElementById('no-btn');
+        const yesBtn = document.getElementById('yes-btn');
+
+        function btnFly() {
+            noBtn.classList.add('shake');
+            setTimeout(() => {
+                yesScale += 0.25;
+                yesBtn.style.transform = `scale(${yesScale})`;
+                yesBtn.innerText = sweetMessages[Math.min(Math.floor(yesScale), sweetMessages.length - 1)];
+
+                // สุ่มย้ายที่เฉพาะในขอบเขตหน้าจอที่เห็น
+                const x = Math.random() * (window.innerWidth - 120);
+                const y = Math.random() * (window.innerHeight - 60);
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = x + 'px';
+                noBtn.style.top = y + 'px';
+                noBtn.classList.remove('shake');
+
+                // พ่นหัวใจ
+                for(let i=0; i<5; i++) {
+                    const h = document.createElement('div');
+                    h.innerHTML = '❤️'; h.className = 'heart-fly';
+                    h.style.left = '50%';
+                    h.style.setProperty('--x', (Math.random()*100 - 50) + 'px');
+                    yesBtn.appendChild(h);
+                    setTimeout(() => h.remove(), 1000);
+                }
+            }, 100);
+        }
+
+        noBtn.addEventListener('mouseover', btnFly);
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); btnFly(); });
+
+        yesBtn.onclick = () => {
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            document.getElementById('love-card').innerHTML = `
+                <h1 style="font-size: 2.8rem;">❤️ I Love You ❤️</h1>
+                <p style="font-size: 1.2rem; margin: 15px 0;">สัญญาว่าจะไม่หยุดพยายามเพื่อเรา และจะดูแลความรัก   ของเราให้ดีที่สุดในทุกๆ วัน</p>
+                <img src="img/img1.png" style="width: 250px; animation: cardAppear 1s;" alt="Flowers">
+                <p style="color: var(--pink-deep); font-weight: bold; margin-top: 15px;">Happy Valentine's Day!</p>🐻☕🧸📋🧋🍪
+            `;
+            
+        };
+    </script>
+</body>
+</html>
